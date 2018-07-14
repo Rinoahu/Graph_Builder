@@ -2347,53 +2347,53 @@ def entry_point(argv):
     get_x = get_row
     Pearson = pearson
 
-    data = [normalize([random() for elem in xrange(5*10**3)]) for elem1 in xrange(start)]
+    #data = [[random() for elem in xrange(5*10**3)] for elem1 in xrange(start)]
 
-    print 'construct rpt'
-    clf = RPT(data, norm=lambda x:x)
-    print 'initial'
-    clf.fit()
-    print 'finish', len(data)
+    #print 'construct rpt'
+    #clf = RPT(data)
+    #print 'initial'
+    #clf.fit()
+    #print 'finish', len(data)
 
-    for x in data:
-        y = clf.query(x)
-        print 'find y point', len(y)
+    #for x in data:
+    #    y = clf.query(x)
+    #    print 'find y point', len(y)
 
-    return 1
+    #return 1
     #raise SystemExit()
-    Nd = len(data)
+    #Nd = len(data)
     # brute force way
-    for i in xrange(Nd):
-        break
-        for j in xrange(Nd):
-            p = Pearson(data[i], data[j])
+    #for i in xrange(Nd):
+    #    #break
+    #    for j in xrange(Nd):
+    #        p = Pearson(data[i], data[j])
 
-        print 'brute finish', i
+    #    print 'brute finish', i
     
     #inf = float('inf')
-    data.extend(data)
+    #data.extend(data)
 
 
-    cut = p2d(prs, 1000)
-    print 'cutoff', cut
-    Tree = Cvt(data, dist=dist_func)
-    Tree.fit()
-    flag = 0
-    flag2 = 0
-    for i in data:
-        #j = Tree.query_radius(i, cut)
-        j = Tree.query_radius(i, cut)
-        #j = Tree.query(i)
-        k = {}
-        for je in j:
-            k[je] = 1
-        #print 'iter, fuck', flag, len(j), cut
+    #cut = p2d(prs, 1000)
+    #print 'cutoff', cut
+    #Tree = Cvt(data, dist=dist_func)
+    #Tree.fit()
+    #flag = 0
+    #flag2 = 0
+    #for i in data:
+    #    #j = Tree.query_radius(i, cut)
+    #    j = Tree.query_radius(i, cut)
+    #    #j = Tree.query(i)
+    #    k = {}
+    #    for je in j:
+    #        k[je] = 1
+    #    #print 'iter, fuck', flag, len(j), cut
 
-        if len(k) >= 2:
-            flag2 += 1.
+    #   if len(k) >= 2:
+    #       flag2 += 1.
 
-        flag += 1
-        print 'iter', flag-1, flag2, flag, flag2 / flag, len(k), j
+    #   flag += 1
+    #   print 'iter', flag-1, flag2, flag, flag2 / flag, len(k), j
 
     # if sparse == 's':
     #    dist_func = pdist_sp
@@ -2429,6 +2429,19 @@ def entry_point(argv):
 
     print 'final iter', flag
     f.close()
+
+    flag = 0
+    for i in data:
+        flag1 = 0
+        for j in data:
+            p = Pearson(i, j)
+            if p >= .2:
+                print n2s[flag], n2s[flag1], p
+            flag1 += 1
+        print 'brute finish', flag
+        flag += 1
+ 
+
 
     Tree = Cvt(data, dist=dist_func)
     Tree.fit()
