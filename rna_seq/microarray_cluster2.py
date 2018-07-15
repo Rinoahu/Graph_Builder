@@ -952,6 +952,11 @@ def p2d(p, n):
     return sqrt(d)
 
 
+def d2p(d, n):
+    p = 1 - d * d / 2. / n
+    return p
+
+
 # pearson dist
 def pdist(x, y):
     p = pearson(x, y)
@@ -1448,6 +1453,18 @@ class vertex:
         self.n = len(self.value)
 
 
+def proju(u, v):
+    lu, lv = len(u), len(v)
+    n = min(lu, lv)
+    d0 = d1 = 1e-9
+    for i in xrange(n):
+        d0 += u[i] * v[i]
+        d1 += u[i] * u[i]
+
+    d = d0 / d1
+    return [elem * d for elem in u]
+
+
 # random projection tree
 class RPT:
 
@@ -1458,6 +1475,8 @@ class RPT:
         print 'tree inital', len(data)
         self.C = len(data[0])
         assert self.C > 0
+
+        self.cnt = 0
         val = range(self.R)
         x = self.data[0]
         #if self.norm:
@@ -1468,6 +1487,8 @@ class RPT:
         #print 'get root', x, hpl
         self.root = vertex(hpl, value=val)
 
+        # count the number of hyperplane
+        #self.u = None
 
     # generate hyperplane
     def hyperplane(self, v):
@@ -1480,12 +1501,22 @@ class RPT:
         #    flag += j
         #hpl.append(0-flag)
         #v = normalize(x)
+
         n = len(v)
         y = v[-1]
         hpl = [random() for elem in xrange(n-1)]
         S = sum([v[elem]*hpl[elem] for elem in xrange(n-1)])
         hpl.append(-S/y)
+        #self.u = hpl
+
+        if self.cnt % self.C != 0 and self.cnt > 0:
+            hpl = proju(self.u, hpl)
+
+        self.u = hpl
+        self.cnt += 1
+
         return hpl
+
 
 
     # build the tree
@@ -1614,8 +1645,11 @@ class RPT:
             #if self.norm:
             #    y = normalize(y)
             y = self.norm(y)
-            if self.dist(q, y) <= rad:
-                out.append(elem)
+            #if self.dist(q, y) <= rad:
+            #    out.append(elem)
+            D = self.dist(q, y)
+            if D <= rad:
+                out.append([elem, D])
 
         return out 
 
@@ -2391,9 +2425,16 @@ def entry_point(argv):
     flag = 0
     for i in data:
         js = Tree.query(i, cut)
-        for j in js:
+        for jd in js:
+            j, d = jd[:2]
+            j = int(j)
             y = data[j]
-            print n2s[flag], n2s[j], pearson(i, y)
+            pr = d2p(d, dim)
+            if pr >= prs:
+                #print n2s[flag], n2s[j], pearson(i, y)
+                print n2s[flag], n2s[j], pr
+
+            #print n2s[flag], n2s[j]
 
         flag += 1
 
