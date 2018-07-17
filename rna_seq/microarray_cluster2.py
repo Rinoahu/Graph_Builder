@@ -121,12 +121,14 @@ def qsort(x, key=lambda x: x):
 
 
 # the double linked-list for int
-class vertex:
+class vertex0:
 
-    def __init__(self, val):
+    def __init__(self, val, rad=0):
         self.val = val
+        self.rad = rad
         self.prev = None
         self.next = None
+
 
 
 class llist:
@@ -650,6 +652,17 @@ def std(x):
         var = sum([(elem - m) * (elem - m) for elem in x]) / (len(x) - 1.)
         return sqrt(var)
 
+# dot function
+def dot(x, y):
+    lx, ly = len(x), len(y)
+    n = min(lx, ly)
+    d = 0
+    for i in xrange(n):
+        d += x[i] * y[i]
+
+    return d
+
+
 
 # the bfprt
 def bfprt(x, k, key=lambda x: x):
@@ -877,12 +890,24 @@ def mannwhitneyu_c(x, y): return 1 - mannwhitneyu(x, y)[1]
 
 
 
-def normalize(x):
+def normalize(x, unit=True):
     u = mean(x)
-    #v = sum([(elem-u)*(elem-u) for elem in x])
-    #s = sqrt(v)
-    s = std(x)
+    if unit:
+        v = sum([(elem-u)*(elem-u) for elem in x])
+        s = sqrt(abs(v))
+        s = s > 0 and s or s + 1e-9
+    else:
+        s = std(x)
     return [(elem-u)/s for elem in x]
+
+# unit a vector x
+def unit(x):
+    v = sum([elem*elem for elem in x])
+    s = sqrt(abs(v))
+    #s = std(x)
+    return [elem/s for elem in x]
+
+
 
 
 # the euclidean distance
@@ -958,10 +983,14 @@ def d2p(d, n):
 
 
 # pearson dist
-def pdist(x, y):
+def pdist(x, y, dim=-1):
+    if dim < 0:
+        lx = len(x)
+    else:
+        lx = dim
     p = pearson(x, y)
     #print 'p is', p
-    d2 = 2 * len(x) * abs(1-p)
+    d2 = 2 * lx * abs(1-p)
     #print 'd2 is', d2
     d = sqrt(d2)
     return d
@@ -1443,13 +1472,14 @@ class array:
 
 # binary child node
 class vertex:
-    def __init__(self, hpl, value=[]):
+    def __init__(self, hpl, value=[], rad=0):
         self.hpl = hpl
         #self.left = [] 
         #self.right = []
         self.left = None
         self.right = None
         self.value = value
+        self.rad = rad
         self.n = len(self.value)
 
 
@@ -1485,13 +1515,27 @@ class RPT:
         print 'generate hyperplane'
         hpl = self.hyperplane(x)
         #print 'get root', x, hpl
-        self.root = vertex(hpl, value=val)
+        ds, dmx = self.find_max_dist(hpl, val)
+        self.root = vertex(hpl, value=val, rad=dmx)
 
         # count the number of hyperplane
         #self.u = None
 
+    def find_max_dist(self, x, vals):
+        dmx = -10000000000000
+        ds = []
+        #x = self.data[i]
+        for i in vals:
+            y = self.data[i]
+            d = self.p2h(x, y)
+            dmx = max(dmx, d)
+            ds.append(d)
+
+        return ds, dmx
+
+
     # generate hyperplane
-    def hyperplane(self, v):
+    def hyperplane0(self, v):
         #flag = 0
         #hpl = []
         #n = len(v)
@@ -1507,16 +1551,21 @@ class RPT:
         hpl = [random() for elem in xrange(n-1)]
         S = sum([v[elem]*hpl[elem] for elem in xrange(n-1)])
         hpl.append(-S/y)
+
         #self.u = hpl
 
-        if self.cnt % self.C != 0 and self.cnt > 0:
-            hpl = proju(self.u, hpl)
+        #if self.cnt % self.C != 0 and self.cnt > 0:
+        #    hpl = proju(self.u, hpl)
 
+        hpl = unit(hpl)
         self.u = hpl
         self.cnt += 1
 
         return hpl
 
+    def hyperplane(self, x):
+        hpl = normalize([random() for elem in xrange(len(x))])
+        return hpl
 
 
     # build the tree
@@ -1524,32 +1573,54 @@ class RPT:
         stack = [self.root]
         while stack:
             n = stack.pop()
-            print 'poping'
+            print 'poping', n
             if len(n.value) < self.chk:
+                print 'continue'
                 continue
             else:
                 n_l, n_r = self.split(n)
+                print 'finish split2'
                 n.left = n_l
                 n.right = n_r
-                stack.extend([n_l, n_r])
+                #stack.extend([n_l, n_r])
                 #n.left.append(n_l)
                 #n.right.append(n_r)
+                if n_l:
+                    stack.append(n_l)
+                if n_r:
+                    stack.append(n_r)
+
+                print 'finish split3'
+        print 'finish fit'
+
+
+
 
     # distance from pointer to hyperplane 
-    def p2h(self, p, h):
+    def p2h0(self, p, h):
         n = min(len(p), len(h))
         d = 0
         v2 = 0
         for i in xrange(n):
             d += p[i] * h[i]
             v2 += h[i] * h[i]
-
+        v2 = abs(v2)
         v = sqrt(v2)
-        return d / v
+        print 'norm_of_hyper', v
+        return v > 0 and d / v or d / (v+1e-9)
+        #if v <= 0:
+            #print 'd v is', d, v, n
+            #return d == 0 and 1 or 1e9
+        #else:
+        #    return d / v
 
+
+    # distance from pointer to hyperplane 
+    def p2h(self, p, h):
+        return euclidean(p, h)
 
     # split the vertex
-    def split(self, node):
+    def split0(self, node):
         lv, rv = [], []
         while node.value:
             i = node.value.pop()
@@ -1580,25 +1651,81 @@ class RPT:
             n_r = vertex(hpl, value=rv)
         else:
             n_r = None
+        print 'finish split'
         return n_l, n_r
+
+
+    def split(self, node):
+        #return node, node
+        lv, rv = [], []
+        #dists = [self.p2h(node.hpl, self.data[elem]) for elem in node.value]
+        #qsort(dists)
+        dists, dmx = self.find_max_dist(node.hpl, node.value)
+        qsort(dists)
+        #thres = dists[len(dists)//2]
+        ld = len(dists)
+        thres = dists[int(ld*.25)]
+
+        while node.value:
+            i = node.value.pop()
+            x = self.data[i]
+            #if self.norm:
+            #    x = normalize(x)
+            x = self.norm(x)
+            if self.p2h(x, node.hpl) < thres:
+                lv.append(i)
+            else:
+                rv.append(i)
+
+        print 'l and r child', len(lv), len(rv)
+        if lv:
+            #x_l = self.data[lv[0]]
+            #if self.norm:
+            #    x_l = normalize(x_l)
+            #x_l = self.norm(x_l)
+            hpl = self.hyperplane(self.data[0])
+            dists, dmx = self.find_max_dist(hpl, lv)
+            n_l = vertex(hpl, value=lv, rad=dmx)
+        else:
+            n_l = None
+        if rv:
+            #x_r = self.data[rv[0]]
+            #x_r = normalize(x_r)
+            #x_r = self.norm(x_r)
+            hpl = self.hyperplane(self.data[0])
+            dists, dmx = self.find_max_dist(hpl, rv)
+            n_r = vertex(hpl, value=rv, rad=dmx)
+        else:
+            n_r = None
+        print 'finish split'
+        return n_l, n_r
+
 
 
     # get leaf
     def leaf(self, node):
+        #if not node:
+        #    return []
+        #return []
         leaves = []
         stack = [node]
         while stack:
             n = stack.pop()
-            if n.left:
-                stack.append(n.left)
-            else:
-                leaves.append(n.value)
-            if n.right:
-                stack.append(n.right)
-            else:
-                leaves.append(n.right)
+            n_l, n_r = n.left, n.right
+            if n_l:
+                stack.append(n_l)
+            #else:
+            #    leaves.append(n.value)
+            if n_r:
+                stack.append(n_r)
+            #else:
+            #    leaves.append(n.value)
+            if not n_l and not n_r:
+                leaves.extend(n.value)
+        return leaves
 
-    def query(self, x, rad=0):
+
+    def query0(self, x, rad=0):
         #if self.norm:
         #    q = normalize(x)
         #else:
@@ -1606,11 +1733,12 @@ class RPT:
         q = self.norm(x)
         stack = [self.root]
         output = []
+        print 'start query'
         while stack:
             node= stack.pop()
             d = self.p2h(q, node.hpl)
             #d = abs(d)
-            print 'curret d', d
+            print 'curret d', d, rad
             if d <= -rad < 0:
                 print 'add left', node.n
                 n_l = node.left
@@ -1620,7 +1748,7 @@ class RPT:
                     output.extend(node.value)
 
             elif 0 <= rad <= d:
-                print 'add right', d, node.right
+                print 'add right', d, rad, node.right
                 n_r = node.right
                 if n_r:
                     print 'right value', n_r.n
@@ -1628,9 +1756,9 @@ class RPT:
                 else:
                     output.extend(node.value)
             else:
-                print 'add both 0', node
+                print 'add both 0', d, rad, node
                 n_l, n_r = node.left, node.right
-                print 'add both 1', n_l, n_r
+                print 'add both 1', d, rad, n_l, n_r
                 if n_l:
                     stack.append(n_l)
                 if n_r:
@@ -1651,7 +1779,56 @@ class RPT:
             if D <= rad:
                 out.append([elem, D])
 
+        print 'output length', len(output)
         return out 
+
+
+    def query(self, x, rad=0):
+        #return []
+        #if self.norm:
+        #    q = normalize(x)
+        #else:
+        #    q = x
+        q = self.norm(x)
+        stack = [self.root]
+        output = []
+        print 'start query xx'
+        while stack:
+            node= stack.pop()
+            d = self.p2h(q, node.hpl)
+            #d = abs(d)
+            print 'curret d', d, node.rad, rad, 'end'
+            if d + node.rad <= rad:
+                leaves = self.leaf(node)
+                #leaves = []
+                output.extend(leaves)
+
+            elif d <= rad + node.rad:
+                n_l, n_r = node.left, node.right
+                if n_l:
+                    stack.append(n_l)
+                if n_r:
+                    stack.append(n_r)
+                if not n_l and not n_r:
+                    output.extend(node.value)
+            else:
+                continue
+        #return output
+        out = []
+        for elem in output:
+            y = self.data[elem]
+            #if self.norm:
+            #    y = normalize(y)
+            y = self.norm(y)
+            #if self.dist(q, y) <= rad:
+            #    out.append(elem)
+            D = self.dist(q, y)
+            if D <= rad:
+                out.append([elem, D])
+
+        print 'output length', len(output)
+        return out 
+
 
 
 
@@ -1670,7 +1847,7 @@ class Node:
 # cover tree
 class Cvt:
 
-    def __init__(self, data, eps=1e-8, dist=ks_test_c, chk=1024):
+    def __init__(self, data, eps=1e-8, dist=ks_test_c, chk=128):
 
         self.data = data
         self.eps = eps
@@ -1683,8 +1860,11 @@ class Cvt:
         #flag = 0
         x = 0
         dists = []
+        #print data[0]
+        #print data[1437]
         for y in xrange(1, n):
             current = self.dist(data[x], data[y])
+            #print 'current_xy_dist', current, x, y, euclidean(data[0], data[1437]), len(data[0]), len(data[1437])
             #radius = radius < current and current or radius
             radius = current if radius < current else radius
             #flag += current > .2
@@ -1697,6 +1877,7 @@ class Cvt:
         self.scale = dists[int(ld * self.rate)] / radius
         #print 'current radius is', radius, 'flag', flag, self.scale
         print 'current radius is', radius, self.scale, 'min dists', dists[0], 'max dists', dists[-1]
+        #print 'all_dist', dists
         self.root = Node(0, range(n), n, radius)
         print 'Node_rank0', len(self.root.rank), 'start_root', len(self.root.rank)
 
@@ -2013,6 +2194,7 @@ class Cvt:
         flag = 0
         visit = {}
         # while stack:
+        flag_flt = 0
         while len(stack) > 0:
 
             flag += 1
@@ -2028,6 +2210,8 @@ class Cvt:
             else:
                 d = visit[node.key]
 
+
+            #print 'current dist xy', d, euclidean(x, y)
             #r = self.radius * pow(scale, level)
             r = node.radius
             # print 'stack length', len(stack)
@@ -2056,6 +2240,7 @@ class Cvt:
                         ds = visit[lf]
                     else:
                         ds = self.dist(x, y)
+                        flag_flt += 1
                     if ds <= err:
                         ranks.append(lf)
 
@@ -2080,7 +2265,7 @@ class Cvt:
                 #print 'found outer dist', d, err, r, 'x'
                 continue
 
-        print 'search times', flag
+        print 'search times', flag, flag_flt
         # print 'all leaves', len(self.leaf(self.root))
         # return [elem for elem in ranks if self.dist(x, data[elem]) <= err]
         # if x == self.data[len(self.data) // 3]:
@@ -2384,7 +2569,8 @@ def entry_point(argv):
     #get_x = get_row_sp
     #Pearson = pearson_sp
 
-    dist_func = pdist
+    #dist_func = pdist
+    dist_func = euclidean
     get_x = get_row
     Pearson = pearson
 
@@ -2417,19 +2603,36 @@ def entry_point(argv):
     print 'final iter', flag
     f.close()
 
-    cut = p2d(prs, dim)
+    cut = p2d(prs, 1)
     print 'cut dist', cut, dim
+    # build small tree
+    Tree = RPT(data[:3], norm=lambda x:x)
+    #hpl = Tree.hyperplane(data[0])
+    hpl = normalize([random() for elem in xrange(dim)])
+
+    Nd = len(data)
+    for i in xrange(Nd):
+        #if i > end:
+        if 1:
+            break
+        for j in xrange(Nd):
+            x, y = data[i], data[j]
+            print i, j, 'pdist', pdist(x, y, 1), euclidean(x, y),'dist2hyper', Tree.p2h(x, hpl), Tree.p2h(y, hpl)
 
 
     Tree = RPT(data, norm=lambda x: x)
+    Tree.fit()
     flag = 0
     for i in data:
         js = Tree.query(i, cut)
+        #print 'js length', len(js)
+
         for jd in js:
             j, d = jd[:2]
             j = int(j)
             y = data[j]
-            pr = d2p(d, dim)
+            pr = d2p(d, 1)
+            #pr = pearson(i, y)
             if pr >= prs:
                 #print n2s[flag], n2s[j], pearson(i, y)
                 print n2s[flag], n2s[j], pr
@@ -2438,12 +2641,15 @@ def entry_point(argv):
 
         flag += 1
 
-
     return 0
+
+
+
 
     Tree = Cvt(data, dist=dist_func)
     Tree.fit()
-    cut = p2d(prs, dim)
+    #cut = p2d(prs, dim)
+    cut = p2d(prs, 1)
     flag = -1
     print 'current cut', cut
     f = open(qry, 'r') 
@@ -2454,6 +2660,7 @@ def entry_point(argv):
 
         J = i[:-1].split(',')
         dat3 = get_x(i, start=16)
+        dat3 = normalize(dat3)
         mx = 0.
         mi = 1
         target = Tree.query_radius(dat3, cut)
