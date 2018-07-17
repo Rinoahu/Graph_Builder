@@ -1570,7 +1570,7 @@ class RPT:
 
 
     # build the tree
-    def fit(self):
+    def fit0(self):
         stack = [self.root]
         while stack:
             n = stack.pop()
@@ -1590,6 +1590,34 @@ class RPT:
                     stack.append(n_l)
                 if n_r:
                     stack.append(n_r)
+
+                print 'finish split3'
+        print 'finish fit'
+
+
+    # build the tree
+    def fit(self):
+        stack = [self.root]
+        while stack:
+            n = stack.pop()
+            print 'poping', n
+            if len(n.value) < self.chk:
+                print 'continue'
+                continue
+            else:
+                n_l, n_r = self.split(n)
+                print 'finish split2'
+                n.left = n_l
+                n.right = n_r
+                #stack.extend([n_l, n_r])
+                #n.left.append(n_l)
+                #n.right.append(n_r)
+                #if n_l:
+                #    stack.append(n_l)
+                #if n_r:
+                #    stack.append(n_r)
+                if n_l and n_r:
+                    stack.extend([n_l, n_r])
 
                 print 'finish split3'
         print 'finish fit'
@@ -1659,11 +1687,11 @@ class RPT:
     def split(self, node):
         #return node, node
         lv, rv = [], []
-        #dists, dmx = self.find_max_dist(node.hpl, node.value)
-        #qsort(dists)
-        #thres = dists[int(ld*.25)]
-        #ld = len(dists)
-        thres = sqrt(2*(1-.1))
+        dists, dmx = self.find_max_dist(node.hpl, node.value)
+        qsort(dists)
+        ld = len(dists)
+        thres = dists[int(ld*.25)]
+        #thres = sqrt(2*(1-.1))
 
         while node.value:
             i = node.value.pop()
@@ -1673,7 +1701,7 @@ class RPT:
             x = self.norm(x)
             dxh = self.p2h(x, node.hpl)
             #print 'dxh', dxh
-            if dxh < thres:
+            if dxh <= thres:
                 lv.append(i)
             else:
                 rv.append(i)
