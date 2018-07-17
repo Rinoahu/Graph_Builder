@@ -1470,18 +1470,6 @@ class array:
         self.f.close()
 
 
-# binary child node
-class vertex:
-    def __init__(self, hpl, value=[], rad=0):
-        self.hpl = hpl
-        #self.left = [] 
-        #self.right = []
-        self.left = None
-        self.right = None
-        self.value = value
-        self.rad = rad
-        self.n = len(self.value)
-
 
 def proju(u, v):
     lu, lv = len(u), len(v)
@@ -1495,7 +1483,22 @@ def proju(u, v):
     return [elem * d for elem in u]
 
 
-# random projection tree
+# binary child node
+class vertex:
+    def __init__(self, hpl, value=[], rad=1000000000, srt=False):
+        self.hpl = hpl
+        #self.left = [] 
+        #self.right = []
+        self.left = None
+        self.right = None
+        self.value = value
+        self.rad = rad
+        self.n = len(self.value)
+        self.srt = srt
+
+
+
+# random projection tree or vantage point tree
 class RPT:
 
     def __init__(self, data, eps=1e-6, dist=euclidean, chk=256, norm=normalize):
@@ -1564,8 +1567,9 @@ class RPT:
         return hpl
 
     def hyperplane(self, x):
-        hpl = normalize([random() for elem in xrange(len(x))])
-        return hpl
+        #hpl = normalize([random() for elem in xrange(len(x))])
+        #return hpl
+        return x
         #return self.data[x]
 
 
@@ -1609,9 +1613,6 @@ class RPT:
                 print 'finish split2'
                 n.left = n_l
                 n.right = n_r
-                #stack.extend([n_l, n_r])
-                #n.left.append(n_l)
-                #n.right.append(n_r)
                 #if n_l:
                 #    stack.append(n_l)
                 #if n_r:
@@ -1690,8 +1691,10 @@ class RPT:
         dists, dmx = self.find_max_dist(node.hpl, node.value)
         qsort(dists)
         ld = len(dists)
-        thres = dists[int(ld*.1)]
-        #thres = sqrt(2*(1-.1))
+        #thres = dists[int(ld*.05)]
+        thres = dists[ld//2]
+        #thres = sqrt(2*(1-.2))
+        #thres = .1
 
         while node.value:
             i = node.value.pop()
@@ -1858,6 +1861,179 @@ class RPT:
                 out.append([elem, D])
 
         print 'output length', len(output)
+        return out 
+
+
+
+# VPT tree
+class VP:
+
+    def __init__(self, data, eps=1e-6, dist=euclidean, chk=256, norm=normalize):
+        self.data, self.eps, self.dist, self.chk, self.norm = data, eps, dist, chk, norm
+        self.R = len(data)
+        assert self.R > 0
+        print 'vp tree inital', len(data)
+        self.C = len(data[0])
+        assert self.C > 0
+
+        self.cnt = 0
+        val = range(self.R)
+        x = self.data[0]
+        #if self.norm:
+        #    x = normalize(x)
+        vp = self.norm(x)
+        print 'vp generate hyperplane'
+        ds, dmx = self.find_max_dist(vp, val)
+        self.root = vertex(vp, value=val, rad=dmx)
+
+        # count the number of hyperplane
+        #self.u = None
+
+    def find_max_dist(self, x, vals):
+        dmx = -10000000000000
+        ds = []
+        #x = self.data[i]
+        for i in vals:
+            y = self.data[i]
+            d = self.p2h(x, y)
+            dmx = max(dmx, d)
+            ds.append(d)
+
+        return ds, dmx
+
+
+    # build the tree
+    def fit(self):
+        stack = [self.root]
+        while stack:
+            n = stack.pop()
+            print 'vp poping', n
+            if len(n.value) < self.chk:
+                print 'continue'
+                continue
+            else:
+                n_l, n_r = self.split(n)
+                print 'vp finish split2'
+                n.left = n_l
+                n.right = n_r
+                if n_l and n_r:
+                    stack.extend([n_l, n_r])
+
+                print 'vp finish split3'
+        print 'vp finish fit'
+
+
+    # distance from pointer to hyperplane 
+    def p2h(self, p, h):
+        return euclidean(p, h)
+
+
+    def split(self, node):
+        #return node, node
+        lv, rv = [], []
+        dists, dmx = self.find_max_dist(node.hpl, node.value)
+        qsort(dists)
+        ld = len(dists)
+        #thres = dists[int(ld*.05)]
+        thres = dists[ld//2]
+        node.rad = min(thres, node.rad)
+
+        # check wether the point can be split
+        L = R = 0
+        for d in dists:
+            if d <= thres:
+                L += 1
+            else:
+                R += 1
+        if L == 0 or R == 0:
+            return None, None
+
+        print 'L', L, 'R', R
+        while node.value:
+            i = node.value.pop()
+            x = self.data[i]
+            x = self.norm(x)
+            dxh = self.p2h(x, node.hpl)
+            if dxh <= thres:
+                lv.append(i)
+            else:
+                rv.append(i)
+
+        vp = self.data[lv[0]]
+        n_l = vertex(vp, value=lv)
+        vp = self.data[rv[0]]
+        n_r = vertex(vp, value=rv)
+        return n_l, n_r
+
+
+    # get leaf
+    def leaf(self, node):
+        #if not node:
+        #    return []
+        #return []
+        leaves = []
+        stack = [node]
+        while stack:
+            n = stack.pop()
+            n_l, n_r = n.left, n.right
+            if n_l:
+                stack.append(n_l)
+            #else:
+            #    leaves.append(n.value)
+            if n_r:
+                stack.append(n_r)
+            #else:
+            #    leaves.append(n.value)
+            if not n_l and not n_r:
+                leaves.extend(n.value)
+        return leaves
+
+    # full == false: only keep half matrix
+    def query(self, x, rad=0, full=True):
+        #return []
+        #if self.norm:
+        #    q = normalize(x)
+        #else:
+        #    q = x
+        q = self.norm(x)
+        stack = [self.root]
+        output = []
+        print 'start query the vp'
+        while stack:
+            node= stack.pop()
+            d = self.p2h(q, node.hpl)
+            #d = abs(d)
+            #print 'curret d', d, node.rad, rad, 'end'
+            if d - rad <= node.rad:
+                #print  'search left', d, rad, node.rad
+                if node.left:
+                    stack.append(node.left)
+                else:
+                    output.extend(node.value)
+            if d + rad >= node.rad:
+                #print 'search right', d, rad, node.rad
+                if node.right:
+                    stack.append(node.right)
+                else:
+                    output.extend(node.value)
+
+        #return output
+        out = []
+        for elem in output:
+            y = self.data[elem]
+            #if self.norm:
+            #    y = normalize(y)
+            y = self.norm(y)
+            #if self.dist(q, y) <= rad:
+            #    out.append(elem)
+            if full == False and q[0] > y[0]:
+                continue
+
+            D = self.dist(q, y)
+            if D <= rad:
+                out.append([elem, D])
+
+        print 'output length', len(output), len(out)
         return out 
 
 
@@ -2651,13 +2827,14 @@ def entry_point(argv):
             print i, j, 'pdist', pdist(x, y, 1), euclidean(x, y),'dist2hyper', Tree.p2h(x, hpl), Tree.p2h(y, hpl)
 
 
-    Tree = RPT(data, norm=lambda x: x)
+    #Tree = RPT(data, norm=lambda x: x)
+    Tree = VP(data, norm=lambda x: x)
     Tree.fit()
     flag = 0
     for i in data:
+        print 'searching', n2s[flag], prs
         js = Tree.query(i, cut)
         #print 'js length', len(js)
-
         for jd in js:
             j, d = jd[:2]
             j = int(j)
