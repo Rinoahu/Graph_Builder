@@ -1934,7 +1934,7 @@ class VP:
         dists, dmx = self.find_max_dist(node.hpl, node.value)
         qsort(dists)
         ld = len(dists)
-        thres = dists[int(ld*.05)]
+        thres = dists[int(ld*.062)]
         #thres = dists[ld//2]
         node.rad = min(thres, node.rad)
 
