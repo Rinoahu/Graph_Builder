@@ -1663,7 +1663,7 @@ class RPT:
         #qsort(dists)
         #thres = dists[int(ld*.25)]
         #ld = len(dists)
-        thres = sqrt(2*(1-.2))
+        thres = sqrt(2*(1-.1))
 
         while node.value:
             i = node.value.pop()
@@ -1671,12 +1671,14 @@ class RPT:
             #if self.norm:
             #    x = normalize(x)
             x = self.norm(x)
-            if self.p2h(x, node.hpl) < thres:
+            dxh = self.p2h(x, node.hpl)
+            #print 'dxh', dxh
+            if dxh < thres:
                 lv.append(i)
             else:
                 rv.append(i)
 
-        print 'l and r child', len(lv), len(rv)
+        print 'l and r child', len(lv), len(rv), thres
         if lv:
             #x_l = self.data[lv[0]]
             #if self.norm:
