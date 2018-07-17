@@ -1989,7 +1989,7 @@ class VP:
         return leaves
 
     # full == false: only keep half matrix
-    def query(self, x, rad=0, full=True):
+    def query(self, x, rad=0, full=False):
         #return []
         #if self.norm:
         #    q = normalize(x)
