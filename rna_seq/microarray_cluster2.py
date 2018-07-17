@@ -1566,6 +1566,7 @@ class RPT:
     def hyperplane(self, x):
         hpl = normalize([random() for elem in xrange(len(x))])
         return hpl
+        #return self.data[x]
 
 
     # build the tree
@@ -1658,13 +1659,11 @@ class RPT:
     def split(self, node):
         #return node, node
         lv, rv = [], []
-        #dists = [self.p2h(node.hpl, self.data[elem]) for elem in node.value]
+        #dists, dmx = self.find_max_dist(node.hpl, node.value)
         #qsort(dists)
-        dists, dmx = self.find_max_dist(node.hpl, node.value)
-        qsort(dists)
-        #thres = dists[len(dists)//2]
+        #thres = dists[int(ld*.25)]
         ld = len(dists)
-        thres = dists[int(ld*.25)]
+        thres = sqrt(2*(1-.2))
 
         while node.value:
             i = node.value.pop()
@@ -1683,7 +1682,8 @@ class RPT:
             #if self.norm:
             #    x_l = normalize(x_l)
             #x_l = self.norm(x_l)
-            hpl = self.hyperplane(self.data[0])
+            #hpl = self.hyperplane(lv[0])
+            hpl = self.data[lv[0]]
             dists, dmx = self.find_max_dist(hpl, lv)
             n_l = vertex(hpl, value=lv, rad=dmx)
         else:
@@ -1692,7 +1692,8 @@ class RPT:
             #x_r = self.data[rv[0]]
             #x_r = normalize(x_r)
             #x_r = self.norm(x_r)
-            hpl = self.hyperplane(self.data[0])
+            #hpl = self.hyperplane(rv[0])
+            hpl = self.data[rv[0]]
             dists, dmx = self.find_max_dist(hpl, rv)
             n_r = vertex(hpl, value=rv, rad=dmx)
         else:
