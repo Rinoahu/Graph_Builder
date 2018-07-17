@@ -1690,7 +1690,7 @@ class RPT:
         dists, dmx = self.find_max_dist(node.hpl, node.value)
         qsort(dists)
         ld = len(dists)
-        thres = dists[int(ld*.25)]
+        thres = dists[int(ld*.1)]
         #thres = sqrt(2*(1-.1))
 
         while node.value:
