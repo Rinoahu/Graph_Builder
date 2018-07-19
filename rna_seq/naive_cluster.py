@@ -1,4 +1,6 @@
 #!usr/bin/env python
+
+# brute force method to calculate similarity matrix
 import numpy as np
 import sys
 from scipy.stats import pearsonr
@@ -86,13 +88,13 @@ def main():
     chk = 10000
     for i in xrange(0, N, chk):
         # caculate pearson cor
-        prs = np.dot(data, data[i:i + chk].T)
+        prs = np.dot(data, data[i:i + chk].T).T
         rows, cols = np.where(prs >= thres)
         #cols += i
         for j in xrange(rows.size):
             r, c = rows[j], cols[j]
             rs, cs = map(n2s.get, [r, c+i])
-            output = [cs, rs, prs[r, c]]
+            output = [rs, cs, prs[r, c]]
             print '\t'.join(map(str, output))
             #print cs, rs, c, r, prs[r, c]
             #print rs, cs, r, c, prs.shape
