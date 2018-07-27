@@ -1866,7 +1866,7 @@ class RPT:
 
 
 # VPT tree
-class VP:
+class VP0:
 
     def __init__(self, data, eps=1e-6, dist=euclidean, chk=256, norm=normalize):
         self.data, self.eps, self.dist, self.chk, self.norm = data, eps, dist, chk, norm
@@ -2035,6 +2035,177 @@ class VP:
 
         print 'output length', len(output), len(out)
         return out 
+
+
+# point
+class Ptr:
+    def __init__(self, vp, indice):
+        self.vp = vp
+        self.indice = indice
+        self.left = None
+        self.right = None
+        self.mu = 2**31
+
+
+class VP:
+
+    def __init__(self, data, eps=1e-6, dist=euclidean, chk=16, norm=normalize):
+        self.data, self.eps, self.dist, self.chk, self.norm = data, eps, dist, chk, norm
+        self.R = len(data)
+        assert self.R > 0
+        print 'vp tree inital', len(data)
+        self.C = len(data[0])
+        assert self.C > 0
+
+        indice = range(self.R)
+        #x = self.data[0]
+        # random select vp point
+        #vp = self.data[int(random()*self.R)]
+        vp = self.randpop(indice)
+        #if self.norm:
+        #    x = normalize(x)
+        #vp = self.norm(self.data[x])
+        print 'vp generate hyperplane'
+        #ds, dmx = self.find_max_dist(vp, val)
+        #lvs, rvs, med = self.split(vp, self.data)
+        self.root = Ptr(vp, indice)
+
+        # count the number of hyperplane
+        #self.u = None
+
+    # random pop an element
+    def randpop(self, x):
+        n = len(x)
+        i = int(random()*n)
+        x[i], x[-1] = x[-1], x[i]
+        y = x.pop()
+        return y
+
+    # get median
+    def median(self, x):
+        qsort(x)
+        hlf = len(x) // 2
+        return hlf, x[hlf]
+
+
+    def split(self, vp, indice):
+        #dists = [self.dist(self.data[vp], self.norm(pt)) for pt in value]
+        norm = self.norm
+        data = self.data
+        dist = self.dist
+
+        distances = [dist(norm(data[vp]), norm(data[i])) for i in indice]
+        hlf, med = self.median(distances)
+
+        lvs, rvs = [], []
+
+        N = len(indice)
+        for i in indice:
+            d = dist(norm(data[vp]), norm(data[i]))
+            if d <= med and len(lvs) <= hlf:
+                lvs.append(i)
+            else:
+                rvs.append(i)
+
+        if lvs:
+            vp_l = self.randpop(lvs)
+            ptr_l = Ptr(vp_l, lvs)
+        else:
+            ptr_l = None
+
+        if rvs:
+            vp_r = self.randpop(rvs)
+            ptr_r = Ptr(vp_r, rvs)
+        else:
+            ptr_r = None
+
+        return ptr_l, ptr_r, med
+
+    def fit(self):
+        stack = [self.root]
+        while stack:
+            ptr = stack.pop()
+            print 'vp poping', ptr
+            if len(ptr.indice) < self.chk:
+                print 'continue'
+                continue
+            else:
+                ptr_l, ptr_r, med = self.split(ptr.vp, ptr.indice)
+                ptr.med = med
+                ptr.left = ptr_l
+                ptr.right = ptr_r
+                #print 'vp finish split2'
+                if ptr.left:
+                    stack.append(ptr.left)
+                if ptr.right:
+                    stack.append(ptr.right)
+        print 'vp finish fit'
+
+
+    # distance from pointer to hyperplane 
+    def p2h(self, p, h):
+        return euclidean(p, h)
+
+    # get leaf
+    def leaf(self, node):
+        leaves = []
+        stack = [node]
+        while stack:
+            n = stack.pop()
+            n_l, n_r = n.left, n.right
+            if n_l:
+                stack.append(n_l)
+            #else:
+            #    leaves.append(n.value)
+            if n_r:
+                stack.append(n_r)
+            #else:
+            #    leaves.append(n.value)
+            if not n_l and not n_r:
+                leaves.extend(n.value)
+        return leaves
+
+    # full == false: only keep half matrix
+    def query(self, x, rad=0, full=False):
+        #return []
+        #if self.norm:
+        #    q = normalize(x)
+        #else:
+        #    q = x
+        data = self.data
+        dist = self.dist
+        norm = self.norm
+
+        q = norm(x)
+        stack = [self.root]
+        nns = []
+        print 'start query the vp'
+        while stack:
+            ptr = stack.pop()
+            vp = ptr.vp
+            p = norm(data[vp])
+            d = dist(q, p)
+            if full or q[0] < p[0]:
+                if d <= rad:
+                    nns.append([vp, d])
+            
+            if ptr.indice:
+                for i in ptr.indice:
+                    p = norm(data[i])
+                    if full or q[0] < p[0]:
+                        d = dist(q, p)
+                        if d <= rad:
+                            nns.append([i, d])
+                    else:
+                        continue
+            else:
+                if d - rad <= ptr.med:
+                    stack.append(ptr.left)
+                if d + rad >= ptr.med:
+                    stack.append(ptr.right)
+
+
+        return nns 
 
 
 
