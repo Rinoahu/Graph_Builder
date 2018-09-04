@@ -10,11 +10,11 @@ Make sure that you have the following installed
 
     3. Install dependency packages via pip:
 
-        $ pip install scipy numpy scikit-learn
+        $ pip install scipy numpy
 
     4. Install dependency packages via conda:
 
-        $ conda install scipy numpy scikit-learn
+        $ conda install scipy numpy
 
 
 ## Download
