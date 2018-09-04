@@ -14,7 +14,9 @@ Make sure that you have the following installed
     5. Install dependency packages via pip or conda:
 
         $ pip install scipy numpy scikit-learn
+
         or
+
         $ conda install scipy numpy scikit-learn
 
 
