@@ -104,6 +104,8 @@ def main():
     R = 0
     buf = []
     for i in f:
+        if i.startswith('#'):
+            continue
         h, j = get_row(i, 1, sep=sep)
         j = np.asarray(j, 'float32')
         #data_row.append(j)
