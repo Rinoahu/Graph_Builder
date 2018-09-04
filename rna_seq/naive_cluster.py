@@ -6,7 +6,7 @@ import sys
 from scipy.stats import pearsonr
 
 
-def get_row(x, start=0, sep=','):
+def get_row(x, start=0, sep='\t'):
     j = x[:-1].split(sep)
     h = j[0]
     n = len(j)
@@ -29,15 +29,71 @@ def get_row(x, start=0, sep=','):
 def normal(X):
     x = X - X.mean()
     y = np.dot(x, x) ** .5
-    return (x + 1e-9) / (y + 1e-9)
+    try:
+        z = x / y
+    except:
+        z = (x + 1e-9) / (y + 1e-9)
+
+    return z
+
+
+
+# print the manual
+def manual_print():
+    print 'Usage:'
+    print '    python %s -i ' % sys.argv[0]
+    print 'Parameters:'
+    print '  -i: str. The name of a tab-delimited file. The 1st column stand for gene names/identifier and the rest columns stand for gene expression levels in different samples.'
+    print '  -t: float. A threshold value to filter low-correlation genes. If the pearson correlation coefficient between gene i and j is less than the threshold, then, it will be set to 0. Default value is 0.2'
+    print '  -o: str. The name of output file. The output is a 3 column tab-delimited file, The 1st and 2nd columns are gene names and the 3rd column is the weight.'
+    print '  -m: int. Memory usage limitation. Deaault is 4GB'
+    print '  -s: str. Character used to separate fields. Deaault is \\t'
+
+
+
+
+
+
+
 
 
 def main():
-    qry = sys.argv[1]
+    #qry = sys.argv[1]
+    #try:
+    #    thres = eval(sys.argv[2])
+    #except:
+    #    thres = .2
+
+    argv = sys.argv
+    # recommand parameter:
+    args = {'-i': '', '-t': '.2', '-m': '4', '-s', '\t', '-o': 'output'}
+
+    N = len(argv)
+    for i in xrange(1, N):
+        k = argv[i]
+        if k in args:
+            try:
+                v = argv[i + 1]
+            except:
+                break
+            args[k] = v
+
+        elif k[:2] in args and len(k) > 2:
+            args[k[:2]] = k[2:]
+
+        else:
+            continue
+
+    if args['-i'] == '':
+        manual_print()
+        raise SystemExit()
+
     try:
-        thres = eval(sys.argv[2])
+        qry, thr, mem, sep, mem = args['-i'], float(eval(args['-t'])), float(eval(args['-m'])), args['-s'], args['-o']
     except:
-        thres = .2
+        manual_print()
+        raise SystemExit()
+
 
     _o = open(qry+'.npy', 'wb')
     f = open(qry, 'r')
@@ -48,7 +104,7 @@ def main():
     R = 0
     buf = []
     for i in f:
-        h, j = get_row(i, 16)
+        h, j = get_row(i, 1, sep=sep)
         j = np.asarray(j, 'float32')
         #data_row.append(j)
         j = normal(j)
@@ -62,7 +118,10 @@ def main():
         #    break
         #if R > 10000:
         #    break
-        if len(buf) > 1000:
+
+        ram = len(buf) * C * 4
+        #if len(buf) > 1000:
+        if ram > mem * 2**29:
             buf = np.asarray(buf, 'float32')
             _o.write(buf.data[:])
             buf = []
@@ -85,20 +144,31 @@ def main():
     # p.set_ef(10)
     # p.add_items(data)
 
-    chk = 10000
+    #chk = 10000
+
+    _o = open(ref, 'w')
+    chk = mem * 2**27 // (D+N)
     for i in xrange(0, N, chk):
         # caculate pearson cor
         prs = np.dot(data, data[i:i + chk].T).T
         rows, cols = np.where(prs >= thres)
         #cols += i
+        outs = []
         for j in xrange(rows.size):
             r, c = rows[j], cols[j]
             rs, cs = map(n2s.get, [r, c+i])
             output = [rs, cs, prs[r, c]]
-            print '\t'.join(map(str, output))
+            tmp = '\t'.join(map(str, output)) + '\n'
+            outs.append(tmp)
+            if len(outs) > 10**5:
+                _o.writelines(outs)
             #print cs, rs, c, r, prs[r, c]
             #print rs, cs, r, c, prs.shape
             #print rs, cs, prs[r, c], pearsonr(data_row[r], data_row[c])[0]
+        if outs:
+            _o.writelines(outs)
+
+    _o.close()
 
     #print 'finish', i, r, c
 

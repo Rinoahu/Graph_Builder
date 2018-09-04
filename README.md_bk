@@ -1,4 +1,0 @@
-This project contains several high performance tools to build the graph from RNA-seq data. It reads the RNA-seq expression file in tab-delimited format and computes the pairwise pearson correlation matrix.
-
-# Usage:
-only compile ./rna_seq/microarray_cluster2.py to exe.
