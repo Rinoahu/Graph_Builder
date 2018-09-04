@@ -10,7 +10,7 @@ git remote rm origin
 
 git add -A .
 git commit -m 'add all the algorithm'
-git remote add origin https://github.com/Rinoahu/clustering_algorithms
+git remote add origin https://github.com/Rinoahu/Graph_Builder
 git pull origin master
 git push origin master
 
