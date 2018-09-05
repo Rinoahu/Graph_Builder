@@ -1,5 +1,5 @@
 # Graph_Builder
-Graph_Builder builds the graph from RNA-seq data. It reads the RNA-seq expression file in tab-delimited format and computes the pairwise pearson correlation matrix. The algorithm used by Graph_Builder is a naive method which computes all-vs-all pearson correlation coefficients. The complexity of this algorithm is O(n^3). However, as the MKL blas library is employed, Graph_Builder runs very fast. In our tests, it took less than 1.5 hour to finish analysis of a RNA-seq data that contains ~180,000 transcripts and ~5,000 samples. The correlation matrix is stored in a triple column format and can be used as input of Markov Clustering Algorithm.
+Graph_Builder builds the graph from RNA-seq data. It reads the RNA-seq expression file in tab-delimited format and computes the pairwise pearson correlation matrix. The algorithm of Graph_Builder is a naive method which computes all-vs-all pearson correlation coefficients. The complexity of the algorithm is O(n^3). However, due to the MKL blas library, Graph_Builder runs very fast. In our tests, it took less than 1.5 hour to finish analysis of a RNA-seq data that contains ~180,000 transcripts and ~5,000 samples. The correlation matrix is stored in a triple column format and can be used as input of Markov Clustering Algorithm.
 ## Requirement
 
 Make sure that you have the following installed
@@ -35,5 +35,5 @@ Make sure that you have the following installed
 
 -t: float. A threshold value to filter low-correlation genes. If the pearson correlation coefficient between gene i and j is less than the threshold, then, it will be set to 0. Default value is 0.2.
 
--o:   str. The name of output file. The output file is an  N x N pearson correlation matrix, where N is the gene number.
+-o:   str. The name of output file. The output is an 3 columns tab-delimited file where the 1st and 2nd columns stand for the gene identifiers, the 3rd column is the pearson's correlation coefficient.
 
