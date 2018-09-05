@@ -33,7 +33,7 @@ Make sure that you have the following installed
 	g3	1.2	1.2	2.2 ...
 	...
 
--t: float. A threshold value to filter low-correlation genes. If the pearson correlation coefficient between gene i and j is less than the threshold, then, it will be set to 0. Default value is 0.2.
+-t: float. The threshold to filter low-correlation gene pairs. If the pearson correlation coefficient between gene i and j is less than the threshold, then, it will be set to 0. Default value is 0.2.
 
 -o:   str. The name of output file. The output is an 3 columns tab-delimited file where the 1st and 2nd columns stand for the gene identifiers, the 3rd column is the pearson's correlation coefficient.
 
