@@ -29,8 +29,11 @@ from rpython.rlib.listsort import TimSort
 from rpython.rlib import listsort
 from rpython.rlib import rstring
 from rpython.rlib.rstruct.runpack import runpack as unpack
+from rpython.rlib.rarithmetic import struct
+
 from time import time, sleep
 from rpython.rlib import rgc
+
 
 
 from time import time, sleep
@@ -2942,6 +2945,8 @@ def entry_point(argv):
         sparse = argv[5]
     except:
         sparse = 'n'
+
+    tmp_pack = unpack('f', 'aaaa')
 
     #dist_func = pdist_sp
     #get_x = get_row_sp
