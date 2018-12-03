@@ -2316,7 +2316,66 @@ def entry_point0(argv):
     return 0
 
 
+# node
+class node:
+    def __init__(self):
+        self.nns = {}
+        self.index = []
+
+
+# trie
+class trie:
+
+    def __init__(self):
+        self.root = node()
+
+    def insert(self, word, index=-1):
+        Node = self.root
+        for i in word:
+            if i not in Node.nns:
+                #print 'insert', i
+                nd = node()
+                Node.nns[i] = nd
+                Node = nd 
+                #print 'after_insert', Node.nns.keys()
+
+        Node.index.append(index)
+
+
+
+    def search(self, word):
+        Node = self.root
+        while Node.nns:
+            x = Node.nns.keys()[0]
+            Node = Node.nns[x]
+            #print 'node x', x
+
+        Node = self.root
+
+        #print 'search', Node.nns.keys()
+        for i in word:
+            #print 'i', i
+            if i in Node.nns:
+                Node = Node.nns[i]
+            else:
+                break
+
+        return Node.index
+
+
+
+
+
+
 def entry_point(argv):
+
+
+    string = 'xxasfasdfasdfijapsdifpasjdfpasjidfpjaspdfjiasdfjasdf'
+    clf = trie()
+    clf.insert(string, 2)
+    print 'find', clf.search(string)
+
+
     qry = argv[1]
 
     try:
@@ -2338,6 +2397,9 @@ def entry_point(argv):
         sparse = argv[5]
     except:
         sparse = 'n'
+
+
+
 
     #dist_func = pdist_sp
     #get_x = get_row_sp

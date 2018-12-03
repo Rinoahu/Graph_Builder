@@ -2923,6 +2923,45 @@ def entry_point0(argv):
     return 0
 
 
+
+class node:
+    def __init__(self):
+        self.nns = {}
+        self.index = []
+
+
+# trie
+class trie:
+
+    def __init__(self):
+        self.root = node()
+
+    def insert(self, word, index=-1):
+        Node = self.root
+        for i in word:
+            if i not in Node.nns:
+                #print 'insert', i
+                nd = node()
+                Node.nns[i] = nd
+                Node = nd 
+                #print 'after_insert', Node.nns.keys()
+
+        Node.index.append(index)
+
+    def search(self, word):
+        Node = self.root
+        #print 'search', Node.nns.keys()
+        for i in word:
+            #print 'i', i
+            if i in Node.nns:
+                Node = Node.nns[i]
+            else:
+                break
+
+        return Node.index
+
+
+
 def entry_point(argv):
     qry = argv[1]
 
