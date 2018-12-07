@@ -2924,14 +2924,14 @@ def entry_point0(argv):
 
 
 
-class node:
+class node0:
     def __init__(self):
         self.nns = {}
         self.index = []
 
 
 # trie
-class trie:
+class trie0:
 
     def __init__(self):
         self.root = node()
@@ -2945,6 +2945,8 @@ class trie:
                 Node.nns[i] = nd
                 Node = nd 
                 #print 'after_insert', Node.nns.keys()
+            else:
+                Node = Node.nns[i]
 
         Node.index.append(index)
 
@@ -2961,12 +2963,208 @@ class trie:
         return Node.index
 
 
+
+
+class node1:
+    def __init__(self):
+        self.string = []
+        #self.string = ''
+        #self.id = -1
+        #self.start = -1
+        #self.end = -1
+        self.nns = []
+        self.index = []
+
+
+# trie
+class trie1:
+
+    def __init__(self):
+        self.root = node()
+
+
+    def index(self, c, string):
+        n = len(string)
+        for i in xrange(n):
+            if c == string[i]:
+                return i
+
+        return -1
+            
+
+    def insert(self, word, index=-1):
+        Node = self.root
+        for i in word:
+            j = self.index(i, Node.string)
+            if j == -1:
+                nd = node()
+                Node.string.append(i)
+                Node.nns.append(nd)
+                Node = nd
+            else:
+                Node = Node.nns[j]
+
+        Node.index.append(index)
+
+    def search(self, word):
+        Node = self.root
+        for i in word:
+            j = self.index(i, Node.string)
+            if j == -1:
+                break
+            else:
+                Node = Node.nns[j]
+
+        return Node.index
+
+
+
+
+
+class node:
+    def __init__(self, start=-1, end=-1):
+        self.index = [] 
+        self.start = start
+        self.end = end 
+        self.child = {}
+
+
+# trie
+class trie:
+
+    def __init__(self):
+        self.root = {}
+        self.strings = []
+        self.N = 0
+
+
+    def split(self, Node):
+        pass
+
+    def get_ptr(self, Node, qry, s1, e1):
+        idx, s0, e0 = Node.index, Node.start, Node.end
+        l0 = e0 - s0
+        ref = self.strings[idx]
+
+        l1 = e1 - s1
+        l = min(l0, l1)
+
+        i0, i1 = s0, s1
+        for i in xrange(l):
+            i0 = s0 + i 
+            i1 = s1 + i
+            if qry[i0] != ref[i1]:
+                break
+
+        # split the node
+        if s0 < i0 < e0 - 1:
+            nd = node(idx, i0, e0)
+            Node.end = i0
+            c = ref[i0]
+            Node[c] = nd
+        elif i0 == e0 - 1 and l0 < l1:
+
+        #return Node
+        return i1
+
+
+
+    def index(self, c, string):
+        n = len(string)
+        for i in xrange(n):
+            if c == string[i]:
+                return i
+
+        return -1
+            
+
+    def insert(self, S1):
+        e1 = len(S1)
+        assert l1 > 0
+        self.N += 1
+        s1, c1 = 0, S1[0]
+        if c1 not in self.root:
+            nd = node(s1, l1)
+            nd.index.append(self.N)
+            self.root[c1] = nd
+            self.string.append(S1[s1: e1])
+            return 1
+        else:
+            Node = self.root[c1]
+            while s1 < e1:
+                idx, s0, e0 = Node.index[0], Node.start, Node.end
+                S0 = self.strings[idx]
+                split = False
+                while s0 < e0 and s1 < e1:
+                    if S0[s0] != S1[s1]:
+                        #split = True
+                        #s0, s1 = i0, i1
+                        break
+                    s0 += 1
+                    s1 += 1
+
+                # split
+                if s0 < e0:
+                    #nd = node(idx, i0, e0)
+                    nd = node(s0, e0)
+                    nd.index = Node.index
+                    nd.child = Node.child
+                    c0 = S0[s0]
+                    Node.child = {c0: nd}
+                    Node.index = [idx]
+                    Node.e0 = s0
+
+
+                if s1 < e1:
+                    c1 = S1[s1]
+                    if c1 in Node.child:
+                        Node = Node.child[c1]
+                    else:
+                        nd = node(s1, e1)
+                        nd.index.append(self.N)
+                        Node.child[c1] = nd
+                        self.string.append(S1[s1: e1])
+                        return 1
+                else:
+                    Node.index.append(self.N)
+                    self.string.append('')
+                    return 1
+
+
+
+        return -1
+
+
+
+
+    def search(self, word):
+        Node = self.root
+        for i in word:
+            j = self.index(i, Node.string)
+            if j == -1:
+                break
+            else:
+                Node = Node.nns[j]
+
+        return Node.index
+
+
+
+
+
+
+
+
+
+
+
 class Node(object):
     def __init__(self, data=''):
         self.data = data
         self.index = []
         self.left = None
         self.right = None
+
 
 
 class Trie(object):
@@ -3039,7 +3237,9 @@ def entry_point(argv):
     N = int(argv[1])
 
     #x = 'asdfasdfasdfasdf'
-    y = 'xasfasdfasdf' * N
+    y = 'xasfasdfasdxf'
+    y = y[:10] * int(N/10.)
+    #clf = Trie()
     clf = trie()
     #print x
     #clf.insert(x, 0)
