@@ -178,9 +178,8 @@ def main():
                 print('outs', len(outs))
                 _o.writelines(outs)
                 outs = []
-            #print cs, rs, c, r, prs[r, c]
-            #print rs, cs, r, c, prs.shape
-            print rs, cs, prs[r, c], pearsonr(data[r+i], data[c])[0]
+
+            #print rs, cs, prs[r, c], pearsonr(data[r+i], data[c])[0]
         if outs:
             _o.writelines(outs)
 
