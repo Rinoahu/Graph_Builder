@@ -66,7 +66,7 @@ def main():
 
     argv = sys.argv
     # recommand parameter:
-    args = {'-i': '', '-t': '.2', '-m': '4', '-s', '\t', '-o': 'output'}
+    args = {'-i': '', '-t': '.2', '-m': '4', '-s': '\t', '-o': 'output'}
 
     N = len(argv)
     for i in xrange(1, N):
