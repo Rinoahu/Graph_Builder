@@ -154,7 +154,7 @@ def main():
 
     _o = open(ref, 'w')
     chk = mem * 2**27 // (D+N)
-    chk = max(chk, 1)
+    chk = int(max(chk, 1))
     for i in xrange(0, N, chk):
         # caculate pearson cor
         prs = np.dot(data, data[i:i + chk].T).T
