@@ -164,16 +164,18 @@ def main():
         # caculate pearson cor
         prs = np.dot(data, data[i:i + chk].T).T
         rows, cols = np.where(np.abs(prs) >= thr)
-        print('prs shape', prs.shape, rows.size)
+        print('prs shape', i, chk, prs.shape, rows.size, cols.size)
         #cols += i
         outs = []
         for j in xrange(rows.size):
             r, c = rows[j], cols[j]
-            rs, cs = map(n2s.get, [r, c+i])
+            #rs, cs = map(n2s.get, [r, c+i])
+            rs, cs = map(n2s.get, [r+i, c])
             output = [rs, cs, prs[r, c]]
             tmp = '\t'.join(map(str, output)) + '\n'
             outs.append(tmp)
             if len(outs) > 10**5:
+                print('outs', len(outs))
                 _o.writelines(outs)
             #print cs, rs, c, r, prs[r, c]
             #print rs, cs, r, c, prs.shape
