@@ -30,7 +30,9 @@ def get_row(x, start=0, sep='\t'):
     return h, zs
 
 
-def normal(X):
+def normal(X, log=True):
+    if log:
+        X = np.log2(X+1e-3)
     x = X - X.mean()
     y = np.dot(x, x) ** .5
     try:
@@ -38,11 +40,6 @@ def normal(X):
     except:
         z = (x + 1e-9) / (y + 1e-9)
 
-    return z
-
-# log2
-def log2normal(x):
-    z = np.log2(x+1e-3)
     return z
 
 
