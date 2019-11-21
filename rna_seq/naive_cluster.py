@@ -30,9 +30,10 @@ def get_row(x, start=0, sep='\t'):
     return h, zs
 
 
-def normal(X, log=True):
-    if log:
-        X = np.log2(X+1e-3)
+#def normal(X, log=True):
+def normal(X):
+    #if log:
+    #    X = np.log2(X+1e-3)
     x = X - X.mean()
     y = np.dot(x, x) ** .5
     try:
@@ -114,6 +115,8 @@ def main():
         h, j = get_row(i, 1, sep=sep)
         j = np.asarray(j, 'float32')
         #data_row.append(j)
+        # log2 of j
+        j = np.log2(j+1e-3)
         j = normal(j)
         j = np.nan_to_num(j)
         #data.append(j)
