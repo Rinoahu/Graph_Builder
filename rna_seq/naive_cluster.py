@@ -114,7 +114,7 @@ def main():
         h, j = get_row(i, 1, sep=sep)
         j = np.asarray(j, 'float32')
         #data_row.append(j)
-        j = log2normal(j)
+        j = normal(j)
         j = np.nan_to_num(j)
         #data.append(j)
         C = j.size
