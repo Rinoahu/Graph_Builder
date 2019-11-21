@@ -89,7 +89,7 @@ def main():
         raise SystemExit()
 
     try:
-        qry, thr, mem, sep, mem = args['-i'], float(eval(args['-t'])), float(eval(args['-m'])), args['-s'], args['-o']
+        qry, thr, mem, sep, ref = args['-i'], float(eval(args['-t'])), float(eval(args['-m'])), args['-s'], args['-o']
     except:
         manual_print()
         raise SystemExit()
