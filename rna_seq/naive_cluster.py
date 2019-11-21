@@ -163,8 +163,8 @@ def main():
     for i in xrange(0, N, chk):
         # caculate pearson cor
         prs = np.dot(data, data[i:i + chk].T).T
-        print('prs shape', prs.shape, rows.size)
         rows, cols = np.where(np.abs(prs) >= thr)
+        print('prs shape', prs.shape, rows.size)
         #cols += i
         outs = []
         for j in xrange(rows.size):
