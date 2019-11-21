@@ -177,6 +177,7 @@ def main():
             if len(outs) > 10**5:
                 print('outs', len(outs))
                 _o.writelines(outs)
+				outs = []
             #print cs, rs, c, r, prs[r, c]
             #print rs, cs, r, c, prs.shape
             #print rs, cs, prs[r, c], pearsonr(data_row[r], data_row[c])[0]
