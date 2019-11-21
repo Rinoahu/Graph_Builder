@@ -4,6 +4,10 @@
 import numpy as np
 import sys
 from scipy.stats import pearsonr
+try:
+    xrange = xrange
+except:
+    xrange = range
 
 
 def get_row(x, start=0, sep='\t'):
