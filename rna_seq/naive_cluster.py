@@ -40,6 +40,10 @@ def normal(X):
 
     return z
 
+# log2
+def log2normal(x):
+    z = np.log2(x+1e-3)
+    return z
 
 
 # print the manual
@@ -113,7 +117,7 @@ def main():
         h, j = get_row(i, 1, sep=sep)
         j = np.asarray(j, 'float32')
         #data_row.append(j)
-        j = normal(j)
+        j = log2normal(j)
         j = np.nan_to_num(j)
         #data.append(j)
         C = j.size
@@ -144,6 +148,7 @@ def main():
 
     data = np.memmap(qry+'.npy', mode='r', shape=(R, C), dtype='float32')
     data = np.asarray(data, 'float32')
+
     N, D = data.shape
     #p = hnswlib.Index(space='ip', dim=D)
     #p.init_index(max_elements=N, ef_construction=100, M=16)
